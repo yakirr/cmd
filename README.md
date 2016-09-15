@@ -1,2 +1,2 @@
 # sh
-Bash and bash-like utilities
+bash-y utilities
