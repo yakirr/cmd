@@ -3,12 +3,15 @@ from __future__ import print_function, division
 import numpy as np
 from scipy import stats
 import argparse
+import statutils.sig as sig
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-z', action='store_true', default=False,
         help='treat input numbers as Z scores for a one-sided test')
-parser.add_argument('-h', action='store_true', default=False,
+parser.add_argument('-header', action='store_true', default=False,
         help='treat first line of each input stream as header')
+parser.add_argument('-v', action='store_true', default=False,
+        help='verbose. print number of significant p-vals in addition to threshold')
 parser.add_argument('--threshold', type=float, default = 0.05)
 parser.add_argument('files', nargs='*', default=['/dev/stdin'])
 #TODO. will require a parameter to specify p-value column
@@ -16,19 +19,24 @@ parser.add_argument('files', nargs='*', default=['/dev/stdin'])
 #         help='print all lines that pass significance, rather than just the threshold')
 args = parser.parse_args()
 
+# read in data
+vals = []
 for name in args.files:
-    f = open(name):
-        for line in f.readlines():
-            print(line)
-# if args.zscores is not None:
-#     z = np.array(map(float, open(args.zscores).readlines()))
-#     p = stats.norm.sf(z)
-# else:
-#     p = np.array(map(float, open(args.pvals).readlines()))
-# p.sort()
-# c = np.arange(1,len(p)+1)*args.threshold/len(p)
-# cutoff_fdr = np.inf
-# for i in range(len(p)):
-#     if p[i] < c[i]:
-#         cutoff_fdr = stats.norm.isf(p[i])
-# print(cutoff_fdr)
+    f = open(name)
+    if args.header:
+        f.readline()
+    vals.append(np.array(map(float, f.readlines())))
+vals = np.concatenate(vals)
+
+# transform to p-values via one-sided test if necessary
+if args.z:
+    p = stats.norm.sf(vals)
+else:
+    p = vals
+
+thresh, numsig = sig.fdr(p, threshold=args.threshold)
+
+if args.v:
+    print(numsig, 'significant p-vals')
+
+print(thresh)
