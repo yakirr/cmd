@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# bsub -q interactive -R "ncpus=12" -I bash
+bsub -q interactive -R "rusage[mem=16384]" -Is bash

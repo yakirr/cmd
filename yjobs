@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# get the basic bjobs output with number of running jobs and total jobs on top
+((see_priority) && (bjobs | grep RUN | wc -l) && \
+    (bjobs | tail -n+2 | wc -l) && (bjobs -w | head -41)) &> ~/.jobsL
+
+# To get output of a non-interactive running job if there is one
+# first, get id of top running job
+JID=$(bjobs -w 2>&1 | grep RUN | grep -v interactive | tr -s " " | cut -d" " -f7 | tail -1)
+
+# now call bpeek on that job
+if [ "$JID" == "" ]
+then
+    (echo "") > ~/.jobsR
+else
+    ((echo "$JID") && (bpeek -J $JID | head -20) && \
+        (printf "\n====SKIPPING MIDDLE=====\n") && (bpeek -J $JID | tail -20)) &> ~/.jobsR
+fi
+
+# show the two outputs side by side
+sdiff -w 204 ~/.jobsL ~/.jobsR
