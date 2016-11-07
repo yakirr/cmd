@@ -2,12 +2,15 @@
 from __future__ import print_function, division
 import numpy as np
 from scipy import stats
+import pandas as pd
 import argparse
 import statutils.sig as sig
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-z', action='store_true', default=False,
         help='treat input numbers as Z scores for a one-sided test')
+parser.add_argument('-z2', action='store_true', default=False,
+        help='tread input numbers as Z scores for a two-sided test')
 parser.add_argument('-header', action='store_true', default=False,
         help='treat first line of each input stream as header')
 parser.add_argument('-v', action='store_true', default=False,
@@ -23,20 +26,22 @@ args = parser.parse_args()
 vals = []
 for name in args.files:
     f = open(name)
-    if args.header:
-        f.readline()
-    vals.append(np.array(map(float, f.readlines())))
+    temp = pd.read_csv(f, header=(None if not args.header else 0))
+    vals.append(temp.iloc[:,0])
 vals = np.concatenate(vals)
 
 # transform to p-values via one-sided test if necessary
 if args.z:
     p = stats.norm.sf(vals)
+elif args.z2:
+    p = stats.chi2.sf(vals**2, 1)
 else:
     p = vals
 
-thresh, numsig = sig.fdr(p, threshold=args.threshold)
+thresh, numsig, pi0 = sig.fdr(p, threshold=args.threshold)
 
 if args.v:
     print(numsig, 'significant p-vals')
+    print(pi0, 'fraction of true nulls')
 
 print(thresh)
