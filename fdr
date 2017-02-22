@@ -38,7 +38,7 @@ elif args.z2:
 else:
     p = vals
 
-thresh, numsig, pi0 = sig.fdr(p, threshold=args.threshold)
+thresh, numsig, pi0 = sig.fdr(p, threshold=args.threshold, st=False)
 
 if args.v:
     print(numsig, 'significant p-vals')
