@@ -1,0 +1,18 @@
+#!/bin/bash
+
+numlines=$1
+
+# get the basic bjobs output with number of running jobs and total jobs on top
+(bjobs 2>&1) > ~/.jobstemp
+(bjobs -d 2>&1) > ~/.jobstemp2
+
+see_priority
+numrunning=$(grep RUN ~/.jobstemp | wc -l)
+total=$(tail -n +2 ~/.jobstemp | wc -l)
+echo "$numrunning running, $total total"
+head -$numlines ~/.jobstemp
+echo "===="
+numexit=$(grep -v DONE ~/.jobstemp2 | tail -n +2 | wc -l)
+numdone=$(grep DONE ~/.jobstemp2 | grep -v "No DONE" | wc -l)
+echo "$numdone are done in past hour. $numexit terminated but not done"
+grep -v DONE ~/.jobstemp2 | tail -$numlines

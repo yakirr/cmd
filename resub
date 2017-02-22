@@ -1,0 +1,7 @@
+#!/bin/bash
+
+outfile=$1
+cmd=$(sed -n '/LSBATCH/{n;p}' $outfile)
+
+echo "resubmitting command: $cmd"
+bsub -q short -W 12:00 -J $outfile -oo $outfile "$cmd"
