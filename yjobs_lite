@@ -15,4 +15,4 @@ echo "===="
 numexit=$(grep -v DONE ~/.jobstemp2 | tail -n +2 | wc -l)
 numdone=$(grep DONE ~/.jobstemp2 | grep -v "No DONE" | wc -l)
 echo "$numdone are done in past hour. $numexit terminated but not done"
-grep -v DONE ~/.jobstemp2 | tail -$numlines
+cat ~/.jobstemp2 | tail -$numlines

@@ -1,7 +1,12 @@
 #!/bin/bash
 
 outfile=$1
+jobid=$2
 cmd=$(sed -n '/LSBATCH/{n;p}' $outfile)
+
+if [[ -n "$jobid" ]]; then
+    cmd=$(echo $cmd | sed "s/\$LSB_JOBINDEX/${jobid}/g")
+fi
 
 echo "resubmitting command: $cmd"
 bsub -q short -W 12:00 -J $outfile -oo $outfile "$cmd"
