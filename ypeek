@@ -2,7 +2,7 @@
 
 # To get output of a non-interactive running job if there is one
 # first, get id of top running job
-JID=$(bjobs -w 2>&1 | grep RUN | grep -v interactive | tr -s " " | cut -d" " -f7 | tail -1)
+JID=$(bjobs -w 2>&1 | grep RUN | grep -v interactive | tr -s " " | cut -d" " -f7 | head -1)
 
 # now call bpeek on that job
 if [ "$JID" == "" ]

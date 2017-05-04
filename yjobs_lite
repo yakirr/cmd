@@ -1,18 +1,23 @@
 #!/bin/bash
 
 numlines=$1
+tmp=$(mktemp /tmp/yjobs_lite.XXXXXX)
+tmp2=$(mktemp /tmp/yjobs_lite.XXXXXX)
 
 # get the basic bjobs output with number of running jobs and total jobs on top
-(bjobs 2>&1) > ~/.jobstemp
-(bjobs -d 2>&1) > ~/.jobstemp2
+(bjobs 2>&1) > $tmp
+(bjobs -d 2>&1) > $tmp2
 
 see_priority
-numrunning=$(grep RUN ~/.jobstemp | wc -l)
-total=$(tail -n +2 ~/.jobstemp | wc -l)
+numrunning=$(grep RUN $tmp | wc -l)
+total=$(tail -n +2 $tmp | wc -l)
 echo "$numrunning running, $total total"
-head -$numlines ~/.jobstemp
+head -$numlines $tmp
 echo "===="
-numexit=$(grep -v DONE ~/.jobstemp2 | tail -n +2 | wc -l)
-numdone=$(grep DONE ~/.jobstemp2 | grep -v "No DONE" | wc -l)
+numexit=$(grep -v DONE $tmp2 | tail -n +2 | wc -l)
+numdone=$(grep DONE $tmp2 | grep -v "No DONE" | wc -l)
 echo "$numdone are done in past hour. $numexit terminated but not done"
-cat ~/.jobstemp2 | tail -$numlines
+cat $tmp2 | tail -$numlines
+
+rm "$tmp"
+rm "$tmp2"
