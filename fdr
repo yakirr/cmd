@@ -1,10 +1,10 @@
 #!/home/yar2/default/bin/python -u
 from __future__ import print_function, division
-import numpy as np
 from scipy import stats
 import pandas as pd
 import argparse
 import statutils.sig as sig
+from sys import stdout
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-z', action='store_true', default=False,
@@ -13,35 +13,34 @@ parser.add_argument('-z2', action='store_true', default=False,
         help='tread input numbers as Z scores for a two-sided test')
 parser.add_argument('-header', action='store_true', default=False,
         help='treat first line of each input stream as header')
-parser.add_argument('-v', action='store_true', default=False,
-        help='verbose. print number of significant p-vals in addition to threshold')
-parser.add_argument('--threshold', type=float, default = 0.05)
+parser.add_argument('-t', action='store_true', default=False,
+        help='terse. print just number of significant hits')
+parser.add_argument('--threshold', type=float, default=0.05)
+parser.add_argument('--col', default=None,
+        help='column to consider for fdr computation. Default is first column')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'])
-#TODO. will require a parameter to specify p-value column
-# parser.add_argument('-l', action='store_true', default=False,
-#         help='print all lines that pass significance, rather than just the threshold')
 args = parser.parse_args()
 
 # read in data
-vals = []
+df = pd.DataFrame()
 for name in args.files:
     f = open(name)
-    temp = pd.read_csv(f, header=(None if not args.header else 0))
-    vals.append(temp.iloc[:,0])
-vals = np.concatenate(vals)
+    df = df.append(
+            pd.read_csv(f, sep='\t', header=(None if not args.header else 0)))
+if args.col is None:
+    args.col = df.columns[0]
 
 # transform to p-values via one-sided test if necessary
 if args.z:
-    p = stats.norm.sf(vals)
+    p = stats.norm.sf(df[args.col].values)
 elif args.z2:
-    p = stats.chi2.sf(vals**2, 1)
+    p = stats.chi2.sf(df[args.col].values**2, 1)
 else:
-    p = vals
+    p = df[args.col].values
 
-thresh, numsig, pi0 = sig.fdr(p, threshold=args.threshold, st=False)
+sigrows = sig.sigrows(df, p, threshold=args.threshold, st=False)
 
-if args.v:
-    print(numsig, 'significant p-vals')
-    print(pi0, 'fraction of true nulls')
-
-print(thresh)
+if args.t:
+    print(len(sigrows))
+else:
+    sigrows.to_csv(stdout, sep='\t', index=False)
