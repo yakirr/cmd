@@ -16,7 +16,7 @@ parser.add_argument('-header', action='store_true', default=False,
 parser.add_argument('-t', action='store_true', default=False,
         help='terse. print just number of significant hits')
 parser.add_argument('--threshold', type=float, default=0.05)
-parser.add_argument('--col', default=None,
+parser.add_argument('--col', default=1,
         help='column to consider for fdr computation. Default is first column')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'])
 args = parser.parse_args()
@@ -27,16 +27,17 @@ for name in args.files:
     f = open(name)
     df = df.append(
             pd.read_csv(f, sep='\t', header=(None if not args.header else 0)))
-if args.col is None:
-    args.col = df.columns[0]
+if not args.header:
+    args.col = df.columns[int(args.col)-1]
+values = df[args.col].values.astype(float)
 
-# transform to p-values via one-sided test if necessary
+# transform to p-values if necessary
 if args.z:
-    p = stats.norm.sf(df[args.col].values)
+    p = stats.norm.sf(values)
 elif args.z2:
-    p = stats.chi2.sf(df[args.col].values**2, 1)
+    p = stats.chi2.sf(values**2, 1)
 else:
-    p = df[args.col].values
+    p = values
 
 sigrows = sig.sigrows(df, p, threshold=args.threshold, st=False)
 
