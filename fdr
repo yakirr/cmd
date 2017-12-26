@@ -1,10 +1,6 @@
 #!/home/yar2/default/bin/python -u
 from __future__ import print_function, division
-from scipy import stats
-import pandas as pd
 import argparse
-import statutils.sig as sig
-from sys import stdout
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-z', action='store_true', default=False,
@@ -20,6 +16,11 @@ parser.add_argument('--col', default=1,
         help='column to consider for fdr computation. Default is first column')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'])
 args = parser.parse_args()
+
+from scipy import stats
+import pandas as pd
+import statutils.sig as sig
+from sys import stdout
 
 # read in data
 df = pd.DataFrame()
