@@ -1,4 +1,3 @@
 #!/bin/bash
 
-# bsub -q interactive -R "ncpus=12" -I bash
-bsub -q interactive -R "rusage[mem=16384]" -Is bash
+srun -p interactive --pty --mem 16000 -t 12:00:00 /bin/bash

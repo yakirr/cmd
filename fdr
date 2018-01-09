@@ -1,4 +1,4 @@
-#!/home/yar2/default/bin/python -u
+#!/home/yar2/o2py/bin/python -u
 from __future__ import print_function, division
 import argparse
 

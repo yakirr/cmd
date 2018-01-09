@@ -1,4 +1,4 @@
 #!/bin/bash
 
-bhpart shared_hosts | head -n 5 | tail -n 1
-bhpart shared_hosts | grep $USER
+sshare | head -n 1
+sshare | grep $USER
