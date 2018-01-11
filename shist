@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# time string for 1 hour ago
+horizon=$(date +%m/%d/%y-%H:%M:%S -d  "1 hour ago")
+
+sacct -u yar2 -X -S $horizon --format JobID,JobName%30,Submit,State,Elapsed

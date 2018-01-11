@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# time string for 12 hours ago
+horizon=$(date +%m/%d/%y-%H:%M:%S -d  "12 hours ago")
+
+sacct -u yar2 -X -S $horizon --format JobID,JobName%30,Submit,State,Elapsed \
+    | grep -v COMPLETED \
+    | grep -v RUNNING \
+    | grep -v PENDING
