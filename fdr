@@ -14,10 +14,13 @@ parser.add_argument('-t', action='store_true', default=False,
 parser.add_argument('--threshold', type=float, default=0.05)
 parser.add_argument('--col', default=1,
         help='column to consider for fdr computation. Default is first column')
+parser.add_argument('--strat', default=None,
+        help='column to define strata for stratified FDR. Default is None')
 parser.add_argument('files', nargs='*', default=['/dev/stdin'])
 args = parser.parse_args()
 
 from scipy import stats
+import numpy as np
 import pandas as pd
 import statutils.sig as sig
 from sys import stdout
@@ -30,7 +33,13 @@ for name in args.files:
             pd.read_csv(f, sep='\t', header=(None if not args.header else 0)))
 if not args.header:
     args.col = df.columns[int(args.col)-1]
+    args.strat = df.columns[int(args.strat)-1]
+
 values = df[args.col].values.astype(float)
+if args.strat is not None:
+    stratvalues = df[args.strat].values
+else:
+    stratvalues = np.ones(len(values))
 
 # transform to p-values if necessary
 if args.z:
@@ -40,7 +49,11 @@ elif args.z2:
 else:
     p = values
 
-sigrows = sig.sigrows(df, p, threshold=args.threshold, st=False)
+sigrows = pd.concat([
+        sig.sigrows(df[stratvalues == l], p[stratvalues == l],
+            threshold=args.threshold, st=False)
+        for l in np.unique(stratvalues)
+        ], axis=0)
 
 if args.t:
     print(len(sigrows))

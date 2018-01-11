@@ -9,7 +9,7 @@ horizon=$(date +%m/%d/%y-%H:%M:%S -d  "1 hour ago")
 
 # get the basic slurm output with number of running jobs and total jobs on top
 (squeue -u yar2 2>&1) > $tmp
-(sacct -u yar2 -X -S $horizon --format JobID,JobName,Submit,State 2>&1) > $tmp2
+(sacct -u yar2 -X -S $horizon --format JobID,JobName%30,Submit,State,Elapsed 2>&1) > $tmp2
 
 see_priority
 numrunning=$(tail -n +2 $tmp | grep " R " | wc -l)
@@ -17,7 +17,7 @@ total=$(tail -n +2 $tmp | wc -l)
 echo "$numrunning running, $total total"
 head -$numlines $tmp
 echo "===="
-numexit=$(grep -v COMPLETED $tmp2 | grep -v RUNNING | tail -n +2 | wc -l)
+numexit=$(grep -v COMPLETED $tmp2 | grep -v RUNNING | grep -v PENDING | tail -n +3 | wc -l)
 numdone=$(grep COMPLETED $tmp2 | wc -l)
 echo "$numdone are done in last hour. $numexit terminated but not done"
 cat $tmp2 | tail -$numlines
