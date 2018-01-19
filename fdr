@@ -33,7 +33,8 @@ for name in args.files:
             pd.read_csv(f, sep='\t', header=(None if not args.header else 0)))
 if not args.header:
     args.col = df.columns[int(args.col)-1]
-    args.strat = df.columns[int(args.strat)-1]
+    if args.strat is not None:
+        args.strat = df.columns[int(args.strat)-1]
 
 values = df[args.col].values.astype(float)
 if args.strat is not None:
